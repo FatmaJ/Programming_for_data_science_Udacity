@@ -1,0 +1,94 @@
+/*Query1*/
+
+WITH t1 AS
+(SELECT *
+FROM category c
+JOIN film_category fc
+ON c.category_id = fc.category_id
+JOIN film f
+ON f.film_id = fc.film_id
+JOIN inventory i
+ON i.film_id = f.film_id
+JOIN rental r
+ON r.inventory_id = i.inventory_id
+WHERE c.name IN ('Animation', 'Children', 'Classics', 'Comedy', 'Family' , 'Music')
+)
+SELECT t1.title film_title,
+t1.name category_name,
+COUNT(t1.title)  rental_count
+FROM t1
+GROUP BY 1,2
+ORDER BY category_name, film_title
+
+
+
+
+/*Query2*/
+
+with t1 AS
+( SELECT *
+FROM film f
+JOIN film_category fm
+ON f.film_id = fm.film_id
+JOIN category c
+ON c.category_id = fm.category_id
+WHERE c.name IN ('Animation', 'Children', 'Classics', 'Comedy', 'Family' , 'Music')
+)
+SELECT
+t1.title film_title,
+t1.name category_name,
+t1.special_features features,
+t1.replacement_cost replacement_cost,
+COUNT(t1.title)  rental_count
+FROM t1
+GROUP BY 1,2,3,4
+ORDER BY category_name, film_title
+
+
+
+
+/*Query3*/
+
+WITH t1 AS
+(SELECT
+DATE_PART('month',rental_date) AS month,
+DATE_PART('year',rental_date) AS year,
+str.store_id ,r.rental_id
+FROM rental AS r
+JOIN staff AS stf
+ON  r.staff_id = stf.staff_id
+JOIN store AS str
+ON str.store_id = stf.store_id
+ )
+ SELECT t1.month Rental_month,
+ t1.year Rental_Year,
+ t1.store_id Store_ID,
+ COUNT (rental_id) Count_rentals
+ FROM t1
+ GROUP BY 1,2,3
+ ORDER BY Count_rentals DESC
+
+
+
+
+
+
+ /*Query4*/
+
+SELECT r.rental_id, c.name, SUM(p.amount) totl, f.title
+      FROM payment p
+      JOIN rental r
+      ON r.rental_id = p.rental_id
+      JOIN inventory i
+      ON i.inventory_id = r.inventory_id
+      JOIN film f
+      ON f.film_id = i.film_id
+      JOIN film_category fc
+      ON f.film_id = fc.film_id
+      JOIN category c
+      ON c.category_id = fc.category_id
+    WHERE c.name IN ('Animation', 'Children', 'Classics', 'Comedy', 'Family' , 'Music')
+      GROUP BY r.rental_id, c.name,f.title
+      ORDER BY 3 DESC
+       LIMIT 10
+
